@@ -1,21 +1,20 @@
 #pragma once
-#include <initializer_list>
 #include <iostream>
 template <typename T>
 class matrix {
     static_assert(
         std::is_same_v<T, int> ||
-        std::is_same_v<T, double> ||
         std::is_same_v<T, float> ||
+        std::is_same_v<T, double> ||
         std::is_same_v<T, size_t>
         );
 private:
     size_t rows_count;
     size_t cols_count;
-    T** data;
+    std::unique_ptr<T[]> data;
 public:
     /*-----------------------Конструкторы---------------------------*/
-    // — по умолчанию(пустая или нулевая) 3x3 по умолчанию
+    // — по умолчанию(пустая или нулевая) 2x2 по умолчанию
     matrix();
     // — с размерами(заполнить нулями или неинициализированно)
     matrix(size_t rows, size_t cols);
@@ -25,10 +24,7 @@ public:
     matrix(const matrix& other);
     // — перемещающий
     matrix(matrix&& other) noexcept;
-    /*-----------------------Деструктор---------------------------*/
-    ~matrix();
     /*-----------------------ФУНКЦИИ---------------------------*/
-
     //— копирующее присваивание
     matrix& operator=(const matrix& other);
     //— перемещающее присваивание
@@ -37,6 +33,10 @@ public:
     const T& operator()(size_t row, size_t col) const;
     // — доступ на чтение/запись
     T& operator()(size_t row, size_t col);
+    // — с проверкой границ (исключение)
+    T& at(size_t row, size_t col);
+    // const — аналогично, константная версия
+    const T& at(size_t row, size_t col) const;
     // — количество строк
     size_t rows() const;
     // — количество столбцов
@@ -57,45 +57,48 @@ public:
     void swap_rows(size_t r1, size_t r2);
     // — поменять столбцы местами
     void swap_cols(size_t c1, size_t c2);
-    //Доступ к элементам
-    // — с проверкой границ (исключение)
-    T& at(size_t row, size_t col);
-    // const — аналогично, константная версия
-    const T& at(size_t row, size_t col) const;
-    //Заполнение и инициализация
     // — заполнить все элементы одним значением
     void fill(const T& value);
-    // — обнулить (если числовой тип)
+    // — обнулить
     void zero();
     // — сделать единичную матрицу (для квадратных)
     void identity();
-    //Математические операции (если добавишь)
     // — сложение с присваиванием
     matrix& operator+=(const matrix& other);
     // — вычитание с присваиванием
     matrix& operator-=(const matrix& other);
-    //T&
     // — умножение на скаляр
     matrix& operator*=(const T& scalar);
+    // — умножение на матрицу
+    matrix& operator*=(const matrix& other);
     // — сложение
     matrix operator+(const matrix& other) const;
     // — вычитание
     matrix operator-(const matrix& other) const;
     // — умножение матриц
-    //я бы сам не скоро додумался бы до этого
     matrix operator*(const matrix& other) const;
     // — умножение на скаляр
     matrix operator*(const T& scalar) const;
     // — транспонирование
     matrix transpose() const;
-   /* // — определитель (для квадратных) сложна нахуй, а я болею мозга не робить ээээ
-    size_t determinant() const ;*/
-    //std::ostream& operator<<(std::ostream& os, const matrix& m);
+    // — определитель (для квадратных)
+    double determinant() const ;
+    // — сравнение
     bool operator==(const matrix& other) const;
     // — сравнение
     bool operator!=(const matrix& other) const;
+    template <typename U>
+    friend std::ostream& operator<<(std::ostream& os, const matrix<U>& m);
 };
 
 template <typename T>
-std::ostream& operator<<(std::ostream& os, const matrix<T>& m);
-#include "matrix.tpp"
+std::ostream& operator<<(std::ostream& os, const matrix<T>& m) {
+    for (size_t i = 0; i < m.rows(); ++i) {
+        for (size_t j = 0; j < m.cols(); ++j) {
+            os << m(i, j) << " ";
+        }
+        os << "\n";
+    }
+    return os;
+}
+#include "matrix.inl"
