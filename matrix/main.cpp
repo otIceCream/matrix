@@ -3,6 +3,9 @@
 
 int main()
 {
+    matrix<int> a;
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
     matrix<int> u = { {2,1},
                 {3,4},
                 { 5, 6 }};
@@ -10,12 +13,11 @@ int main()
                 {3,4,7} };
     matrix<int> l = i * u;
     matrix<double> o(10, 10);
-    for (int i = 0; i< o.rows(); ++i) {
-        for (int j = 0; j < o.cols(); ++j) {
-            o.at(i, j) = (i+j) * -1,1;
-            std::cout << o << "\n\n";
-        } 
-    }
+    o.fill(1);
+    o.insert_row(2);
+    o.insert_col(2);
+    o.resize(3, 3);
+    std::cout << o << "\n\n";
     
     std::cout << u;
 
